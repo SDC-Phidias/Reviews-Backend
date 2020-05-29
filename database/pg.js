@@ -9,9 +9,17 @@ const client = new Client({
   database: 'Reviews'
 });
 
-client.connect()
-.then(() => console.log('Connected'))
-.catch((err) => console.error(err))
-.finally(() => client.end());
-
-
+  execute();
+ async function execute() {
+   try {
+     await client.connect()
+     console.log('Connected')
+    }
+    catch (error) {
+      console.error(error);
+    }
+    finally {
+      await client.end();
+      console.log('Connection disconnected successfully');      
+   }
+ }

@@ -9,7 +9,8 @@ const client = new Client({
   database: 'Reviews'
 });
 
-  execute();
+ execute();
+ 
  async function execute() {
    try {
      await client.connect()

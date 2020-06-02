@@ -24,8 +24,8 @@ const reviewsSchema = mongoose.Schema({
   reviewer_name: String,
   reviewer_email: String,
   helpfulness: Number,
-  photos: [reviewPhotosSchema],
 });
+
 const characteristicsSchema = mongoose.Schema({
   id: Number,
   product_id: Number,

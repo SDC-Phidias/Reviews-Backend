@@ -89,7 +89,9 @@ const retrieveMeta = (productID) => {
         recommended: recommend,
       };
     })
-    .catch((err) => console.error(err))
+    .catch((err) => {
+      console.error(err)
+    })
     .then(() => {
       return getCharacteristics(productID);
     })
@@ -97,7 +99,11 @@ const retrieveMeta = (productID) => {
       let characteristics = formatData(results[0].characteristics);
       queryResult.characteristics = characteristics;
       return queryResult;
-    });
+    })
+    .catch(() => {
+      queryResult.characteristics = {};
+      return queryResult;
+    })
 };
 
 const getCharacteristics = async (productID) => {
@@ -129,13 +135,16 @@ const getCharacteristics = async (productID) => {
         promised.push(getAvgValue(id));
       });
     })
-    .catch((err) => console.error(err))
+    .catch(() => {
+      characterQResults.characteristics = {
+      };
+    })
     .then(() => {
       return Promise.all(promised);
     })
     .catch((err) => console.error(err))
     .then((results) => {
-      return mapValueToObj(results, characterQResults.characteristics);
+      return mapValueToObj(results, characterQResults.characteristics)
     })
     .catch((err) => console.error(err));
 };
@@ -167,9 +176,9 @@ const getAvgValue = (charID) => {
       };
       return charReviewObj;
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {console.error(err)});
 };
-const update = (param, model, options) => {
+const update = (param, options) => {
   let updateQuery = { $set: { helpfulness: param.helpfulness } };
   return Review.findByIdAndUpdate(param_id, updateQuery, options).exec();
 };

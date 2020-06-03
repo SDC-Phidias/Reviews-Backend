@@ -1,8 +1,10 @@
 module.exports = {
   getRecommendCounts: (aggregateArr) => {
     let results = {};
+    // edge case: undefined input
+    if (!aggregateArr) return results;
     // edge case: empty input array
-    if (aggregateArr[0].recommend.length === 0) return results;
+    if (!aggregateArr[0]) return results;
     aggregateArr[0].recommend.forEach((ele) => {
       if (ele === 0) {
         if (results["0"]) {
@@ -23,7 +25,8 @@ module.exports = {
   getRatingsCounts: (aggregateArr) => {
     let results = {};
     // edge case: empty input array
-    if (aggregateArr[0].rating.length === 0) return results;
+    if (!aggregateArr[0]) return results;
+    if (!aggregateArr[0].rating) return results;
     aggregateArr[0].rating.forEach((ele) => {
       if (ele === 1) {
         if (results["1"]) {
@@ -61,7 +64,8 @@ module.exports = {
   },
   mapValueToObj: (valArr, charArr) => {
     // edge case: empty input array
-    if (charArr[0].characteristics.length === 0) return charArr;
+    if (!charArr[0]) return charArr;
+    if (!charArr[0].characteristics) return charArr;
     charArr[0].characteristics.forEach((ele, i) => {
       if (ele.id === valArr[i].id) {
         ele.value = valArr[i].value.toFixed(4);

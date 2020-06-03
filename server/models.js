@@ -4,6 +4,12 @@ const {
   CharReview,
   Characteristics,
 } = require("../database/MongoDB/models");
+const {
+  getRecommendCounts,
+  getRatingsCounts,
+  mapValueToObj,
+  formatData,
+} = require("./helper");
 
 const retrieveReviews = async (productID, page, count, sort) => {
   let queryResult = {};
@@ -17,7 +23,6 @@ const retrieveReviews = async (productID, page, count, sort) => {
     .lean()
     .exec()
     .then((results) => {
-      console.log(results);
       queryResult.product_id = productID;
       queryResult.page = page;
       queryResult.count = count;
@@ -50,23 +55,159 @@ const retrievePhotos = (reviewID) => {
     .exec()
     .then((results) => {
       return results;
-    });
+    })
+    .catch((err) => console.error(err));
 };
 
-const retrieveMeta = (productID) => {};
+const retrieveMeta = (productID) => {
+  let queryResult = {};
+  return Reviews.aggregate([
+    {
+      $match: {
+        product_id: parseInt(productID),
+      },
+    },
+    {
+      $group: {
+        _id: "$product_id",
+        recommend: {
+          $push: "$recommend",
+        },
+        rating: {
+          $push: "$rating",
+        },
+      },
+    },
+  ])
+    .exec()
+    .then((results) => {
+      let recommend = getRecommendCounts(results);
+      let rating = getRatingsCounts(results);
+      queryResult = {
+        product_id: productID,
+        ratings: rating,
+        recommended: recommend,
+      };
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+    .then(() => {
+      return getCharacteristics(productID);
+    })
+    .then((results) => {
+      let characteristics = formatData(results[0].characteristics);
+      queryResult.characteristics = characteristics;
+      return queryResult;
+    })
+    .catch(() => {
+      queryResult.characteristics = {};
+      return queryResult;
+    })
+};
 
-const update = (param, model, options) => {
-  let updateQuery = { $set: { helpfulness: helpfulness } };
+const getCharacteristics = async (productID) => {
+  let promised = [];
+  let characterQResults = {};
+  return Characteristics.aggregate([
+    {
+      $match: {
+        product_id: parseInt(productID),
+      },
+    },
+    {
+      $group: {
+        _id: "$product_id",
+        characteristics: {
+          $push: {
+            id: "$id",
+            name: "$name",
+          },
+        },
+      },
+    },
+  ])
+    .exec()
+    .then((queryResults) => {
+      characterQResults.characteristics = queryResults;
+      queryResults[0].characteristics.map(async (ele, i) => {
+        let id = parseInt(ele.id);
+        promised.push(getAvgValue(id));
+      });
+    })
+    .catch(() => {
+      characterQResults.characteristics = {
+      };
+    })
+    .then(() => {
+      return Promise.all(promised);
+    })
+    .catch((err) => console.error(err))
+    .then((results) => {
+      return mapValueToObj(results, characterQResults.characteristics)
+    })
+    .catch((err) => console.error(err));
+};
+
+const getAvgValue = (charID) => {
+  return CharReview.aggregate([
+    {
+      $match: {
+        characteristic_id: parseInt(charID),
+      },
+    },
+    {
+      $group: {
+        _id: "$characteristic_id",
+        value: {
+          $push: "$value",
+        },
+        avg: {
+          $avg: "$value",
+        },
+      },
+    },
+  ])
+    .exec()
+    .then((results) => {
+      let charReviewObj = {
+        id: results[0]._id,
+        value: results[0].avg,
+      };
+      return charReviewObj;
+    })
+    .catch((err) => {console.error(err)});
+};
+const update = (param, options) => {
+  let updateQuery = { $set: { helpfulness: param.helpfulness } };
   return Review.findByIdAndUpdate(param_id, updateQuery, options).exec();
 };
-const saveReview = (params) => {
-  return reviewsInstance.save();
+const addReview = (params) => {
+  let reviewsInstance = new Reviews({
+    review_id: params.review_id,
+    product_id: params.product_id,
+    rating: params.rating,
+    date: params.date || Date.now(),
+    summary: params.summary,
+    body: params.body,
+    recommend: Number(params.recommend) || 0,
+    reported: 0,
+    reviwer_name: params.reviewer_name,
+    reviwer_email: params.reviewer_email,
+    helpfulness: Number(params.helpfulness) || 0,
+  });
+  let photoInstance = new Photos({
+    id: params,
+    review_id: reviewID,
+    url: params.photo,
+  });
+  return Promise.all(reviewsInstance.save(), photoInstance.save());
 };
 
 const updateHelpful = (reviewID = {});
 
 module.exports = {
-  saveReview,
+  addReview,
   retrieveReviews,
   retrieveMeta,
   update,

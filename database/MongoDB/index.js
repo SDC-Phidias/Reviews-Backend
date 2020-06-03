@@ -4,5 +4,4 @@ mongoose.connect("mongodb://localhost/Reviews", {
   useNewUrlParser: true,
 });
 
-// Export
 module.exports = mongoose.connection;

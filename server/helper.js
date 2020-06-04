@@ -3,9 +3,8 @@ module.exports = {
     let results = {};
     // edge case: undefined input
     if (!aggregateArr) return results;
-    // edge case: empty input array
     if (!aggregateArr[0]) return results;
-    aggregateArr[0].recommend.forEach((ele) => {
+    aggregateArr[0].forEach((ele) => {
       if (ele === 0) {
         if (results["0"]) {
           results["0"]++;
@@ -25,9 +24,9 @@ module.exports = {
   getRatingsCounts: (aggregateArr) => {
     let results = {};
     // edge case: empty input array
+    if (!aggregateArr) return results;
     if (!aggregateArr[0]) return results;
-    if (!aggregateArr[0].rating) return results;
-    aggregateArr[0].rating.forEach((ele) => {
+    aggregateArr[0].forEach((ele) => {
       if (ele === 1) {
         if (results["1"]) {
           results["1"]++;
@@ -64,9 +63,9 @@ module.exports = {
   },
   mapValueToObj: (valArr, charArr) => {
     // edge case: empty input array
-    if (!charArr[0]) return charArr;
-    if (!charArr[0].characteristics) return charArr;
-    charArr[0].characteristics.forEach((ele, i) => {
+    if (!charArr) return charArr;
+    if (!charArr.characteristics) return charArr;
+    charArr.characteristics.forEach((ele, i) => {
       if (ele.id === valArr[i].id) {
         ele.value = valArr[i].value.toFixed(4);
       }
@@ -75,14 +74,23 @@ module.exports = {
   },
   formatData: (ObjToClient) => {
     let results = {};
-    // edge case: empty input array
-    if (ObjToClient.length === 0) return results;
-    ObjToClient.forEach((ele) => {
-      results[ele.name] = {
-        id: ele.id,
-        value: ele.value,
+    const {id} = ObjToClient[0];
+    const {name} = ObjToClient[0];
+    const {values} = ObjToClient[0]; 
+      results = {
+        name: name,
+        id: id[0],
+        value: (values.valueArr),
       };
-    });
     return results;
   },
+  getAvg: (arr) => {
+    if (arr.length === 0 ) return 0;
+    if (!arr) return 0;
+    let results = 0;
+    arr.forEach((val) => {
+      results+=val;
+    })
+    return results/arr.length;
+  }
 };

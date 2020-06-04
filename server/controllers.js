@@ -18,11 +18,9 @@ module.exports = {
       })
       .catch((err) => res.status(500));
   },
-  postReviews: (req, res) => {
-    models
-      .addReview(req.body)
-      .then(() => res.sendStatus(201))
-      .catch(() => console.log("Error saving Review"));
+  addReviews: (req, res) => {
+    console.log(req.body);
+    res.sendStatus(201);
   },
   updatingReview: (req, res) => {
     models

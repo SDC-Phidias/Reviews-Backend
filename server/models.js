@@ -176,7 +176,9 @@ const getAvgValue = (charID) => {
       };
       return charReviewObj;
     })
-    .catch((err) => {console.error(err)});
+    .catch(() => {
+      return {};
+    });
 };
 const update = (param, options) => {
   let updateQuery = { $set: { helpfulness: param.helpfulness } };
@@ -194,6 +196,7 @@ const addReview = (params) => {
     reported: 0,
     reviwer_name: params.reviewer_name,
     reviwer_email: params.reviewer_email,
+    response: '',
     helpfulness: Number(params.helpfulness) || 0,
   });
   let photoInstance = new Photos({

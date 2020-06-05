@@ -7,13 +7,18 @@ const {
 const {
   getRecommendCounts,
   getRatingsCounts,
-  mapValueToObj,
   formatData,
   getAvg,
+  filterSort
 } = require("./helper");
+const {
+  getNewCharID,
+  getNewReviewID,
+  getNewPhotoID,
+} = require("./modelHelpers");
 
+// route for review/list
 const retrieveReviews = (productID, page, count, sort) => {
-  sort = sort;
   return Reviews.aggregate([
     {
       $match: {
@@ -34,7 +39,7 @@ const retrieveReviews = (productID, page, count, sort) => {
     },
     {
       $sort: {
-        sort: -1,
+        sort : -1
       },
     },
     {
@@ -43,6 +48,7 @@ const retrieveReviews = (productID, page, count, sort) => {
         reported: 0,
         product_id: 0,
         "photos._id": 0,
+        _v: 0,
       },
     },
   ])
@@ -68,6 +74,7 @@ const retrieveReviews = (productID, page, count, sort) => {
     });
 };
 
+// route meta data
 const retrieveMeta = (productID) => {
   return Characteristics.aggregate([
     {
@@ -146,39 +153,112 @@ const retrieveMeta = (productID) => {
       return queryResults;
     });
 };
-
-const update = (param, options) => {
-  let updateQuery = { $set: { helpfulness: param.helpfulness } };
-  return Review.findByIdAndUpdate(param_id, updateQuery, options).exec();
+// route update helpfulness
+const updateHelpful = async (params) => {
+  let updateQuery = { $inc: { helpfulness: 1 } };
+  await Reviews.findOneAndUpdate({ review_id: params }, updateQuery)
+    .exec()
+    .then((results) => {
+      console.log("results", results);
+    })
+    .catch((err) => {
+      return err;
+    });
 };
-const addReview = (params) => {
-  let reviewsInstance = new Reviews({
-    review_id: params.review_id,
-    product_id: params.product_id,
-    rating: params.rating,
-    date: params.date || Date.now(),
-    summary: params.summary,
-    body: params.body,
-    recommend: Number(params.recommend) || 0,
-    reported: 0,
-    reviwer_name: params.reviewer_name,
-    reviwer_email: params.reviewer_email,
-    response: "",
-    helpfulness: Number(params.helpfulness) || 0,
-  });
-  let photoInstance = new Photos({
-    id: params,
-    review_id: reviewID,
-    url: params.photo,
-  });
-  return Promise.all(reviewsInstance.save(), photoInstance.save());
+// route for reporting review
+const reportReview = async (params) => {
+  let updateQuery = { $set: { reported: 1 } };
+  await Reviews.findOneAndUpdate({ review_id: params }, updateQuery)
+    .exec()
+    .then((results) => {
+      console.log("results", results);
+    })
+    .catch((err) => {
+      return err;
+    });
 };
 
-const updateHelpful = (reviewID = {});
+// route add review
+const addReview = (productID, params) => {
+  let newReivewID;
+  return getNewReviewID()
+    .then((results) => {
+      newReivewID = results;
+      return;
+    })
+    .then(() => {
+      let reviewsInstance = new Reviews({
+        review_id: parseInt(newReivewID + 1),
+        product_id: parseInt(productID),
+        rating: parseInt(params.rating),
+        date: params.date || Date.now(),
+        summary: params.summary,
+        body: params.body,
+        recommend: Number(params.recommend) || 0,
+        reported: 0,
+        reviewer_name: params.name,
+        reviewer_email: params.email,
+        response: "",
+        helpfulness: 0,
+      });
+      reviewsInstance.save();
+      return;
+    })
+    .then(() => {
+      if (!params.photos) {
+        return;
+      } else {
+        const photoID = getNewPhotoID();
+        const promisedPhotosSaved = params.photos.map((photo, i) => {
+          let photoInstance = new Photos({
+            id: parseInt(photoID) + (i + 1),
+            review_id: newReivewID,
+            url: photo.url,
+          });
+          photoInstance.save();
+        });
+        return Promise.all(promisedPhotosSaved);
+      }
+    })
+    .then(() => {
+      return getNewCharID();
+    })
+    .then((results) => {
+      const {id, char_id} = results;
+      const promisedCharReviewSaved = Object.entries(
+        params.characteristics
+      ).map((char, i) => {
+        const charReviewInstance = new CharReview({
+          id: parseInt(id) + (1 + i),
+          characteristic_id: Number((char_id) + (1 + i)),
+          review_id: newReivewID,
+          value: Number(char[1].value),
+        });        
+        console.log(typeof char_id);
+        return charReviewInstance.save();
+      });
+      const promisedCharSaved = Object.entries(params.characteristics).map(
+        (char, i) => {
+          const CharIntstance = new Characteristics({
+            id: Number((char_id) + (1 + i)),
+            product_id: productID,
+            name: char[0],
+          });
+          console.log(char[0]);
+          return CharIntstance.save();
+        }
+      );
+      return Promise.all(promisedCharReviewSaved, promisedCharSaved);
+    })
+    .then(() => {
+      return "complete";
+    });
+};
 
 module.exports = {
   addReview,
   retrieveReviews,
   retrieveMeta,
-  update,
+  updateHelpful,
+  reportReview,
 };

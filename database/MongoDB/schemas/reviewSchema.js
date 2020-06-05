@@ -11,6 +11,7 @@ const reviewsSchema = mongoose.Schema({
   reported: Number,
   reviewer_name: String,
   reviewer_email: String,
+  response: String,
   helpfulness: Number,
 });
 

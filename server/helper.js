@@ -61,36 +61,38 @@ module.exports = {
     });
     return results;
   },
-  mapValueToObj: (valArr, charArr) => {
-    // edge case: empty input array
-    if (!charArr) return charArr;
-    if (!charArr.characteristics) return charArr;
-    charArr.characteristics.forEach((ele, i) => {
-      if (ele.id === valArr[i].id) {
-        ele.value = valArr[i].value.toFixed(4);
-      }
-    });
-    return charArr;
-  },
   formatData: (ObjToClient) => {
     let results = {};
-    const {id} = ObjToClient[0];
-    const {name} = ObjToClient[0];
-    const {values} = ObjToClient[0]; 
-      results = {
-        name: name,
-        id: id[0],
-        value: (values.valueArr),
-      };
+    const { id } = ObjToClient[0];
+    const { name } = ObjToClient[0];
+    const { values } = ObjToClient[0];
+    results = {
+      name: name,
+      id: id[0],
+      value: values.valueArr,
+    };
     return results;
   },
   getAvg: (arr) => {
-    if (arr.length === 0 ) return 0;
+    if (arr.length === 0) return 0;
     if (!arr) return 0;
     let results = 0;
     arr.forEach((val) => {
-      results+=val;
-    })
-    return results/arr.length;
-  }
+      results += val;
+    });
+    return results / arr.length;
+  },
+  filterSort: (str) => {
+    /* "newest", "helpful ~> (helpfulness)", or "relevant" */
+    switch (str) {
+      case "newest":
+        return "date";
+      case "helpful":
+        return "helpfulness";
+      case "relevant":
+        return "helpfulness";
+      default:
+        return "helpfulness";
+    }
+  },
 };

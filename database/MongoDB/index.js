@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost/Reviews", {
+mongoose.connect("mongodb://mongo:27017/Reviews", {
   useUnifiedTopology: true,
   useNewUrlParser: true,
   useFindAndModify: false,

@@ -18,10 +18,7 @@
   },
   "scripts": {
     "start": "node ./server/index.js",
-    "test": "jest",
-    "up" : "docker-compose up -d",
-    "stop": "docker-compose stop",
-    "down": "docker-compose down"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

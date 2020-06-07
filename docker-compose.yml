@@ -9,6 +9,7 @@ services:
     links:
       - mongo
   mongo:
+    user: $UIDusesdsd
     container_name: mongo
     image: mongo
     restart: always
@@ -17,8 +18,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
       MONGO_INITDB_DATABASE: Reviews
       MONGO_USERNAME: admin
-      MONGO_PASSWORD: 
+      MONGO_PASSWORD: secret
     volumes:
-      - "./data:/data/db"
+      -  ./data:/data/db
+      -  /mongo-init.sh:/docker-entrypoint-initdb.d/mongoinit-sh:ro
     ports:
-      - "27017:27017"`
+      - "27017:27017"

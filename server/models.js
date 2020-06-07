@@ -229,7 +229,6 @@ const addReview = (productID, params) => {
           review_id: newReivewID,
           value: Number(char[1].value),
         });
-        console.log(typeof char_id);
         return charReviewInstance.save();
       });
       const promisedCharSaved = Object.entries(params.characteristics).map(
@@ -239,7 +238,6 @@ const addReview = (productID, params) => {
             product_id: productID,
             name: char[0],
           });
-          console.log(char[0]);
           return CharIntstance.save();
         }
       );

@@ -8,7 +8,7 @@ const db = require("./index");
 const Reviews = mongoose.model("Reviews", reviewsSchema, "reviews");
 
 const CharReview = mongoose.model(
-  "Characteristics",
+  "CharReview",
   charReviewSchema,
   "characteristic_reviews"
 );
@@ -16,7 +16,7 @@ const CharReview = mongoose.model(
 const Photos = mongoose.model("Photos", reviewPhotosSchema, "reviews_photos");
 
 const Characteristics = mongoose.model(
-  "CharRevies",
+  "Characteristics",
   characteristicsSchema,
   "characteristics"
 );

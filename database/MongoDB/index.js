@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
-const {MONGO_DATABASE,
-  MONGO_HOST,
-  MONGO_PASSWORD,
-  MONGO_USERNAME,
-  MONGO_PORT,
-  MONGO_OPTIONS} = require('./config');
 
-mongoose.connect(`mongodb://${MONGO_HOST}/${MONGO_DATABASE}`, MONGO_OPTIONS)
+mongoose.connect(`mongodb://mongo/Reviews`, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  poolSize: 10
+})
 .then(() => console.log('Connected to Mongodb'))
 .catch((err) => console.log('ERROR', err));
 

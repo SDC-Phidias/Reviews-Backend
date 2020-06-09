@@ -4,9 +4,6 @@ const app = express();
 const cors = require('cors');
 app.use(cors());
 
-const morgan = require("morgan");
-app.use(morgan("dev"));
-
 const parser = require("body-parser");
 app.use(parser.json());
 

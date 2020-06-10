@@ -18,7 +18,7 @@ module.exports = {
   getMetaData: (req, res) => {
     const productID = req.params.product_id;
     models
-      .retrieveMeta(productID)      
+      .retrieveMeta(productID)
       .then((results) => {
         return results;
       })
@@ -29,14 +29,15 @@ module.exports = {
   },
   addReviews: (req, res) => {
     const productID = req.params.product_id;
-    models.addReview(productID, req.body)
-    .then(() => {
-      res.sendStatus(201)
-    })
-    .catch((err) => {
-      console.log(err);
-      res.sendStatus(500);
-  })
+    models
+      .addReview(productID, req.body)
+      .then(() => {
+        res.sendStatus(201);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+      });
   },
   updateHelpfulness: (req, res) => {
     const reviewID = req.params.review_id;

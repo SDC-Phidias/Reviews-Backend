@@ -5,7 +5,7 @@ const cors = require('cors');
 app.use(cors());
 
 const morgan = require("morgan");
-app.use(morgan("dev"));
+app.use(morgan("tiny"));
 
 const parser = require("body-parser");
 app.use(parser.json());

@@ -9,7 +9,7 @@ const {
   getRatingsCounts,
   formatData,
   getAvg,
-  filterSort
+  filterSort,
 } = require("./helper");
 const {
   getNewCharID,
@@ -20,15 +20,15 @@ const {
 // route for review/list
 const retrieveReviews = (productID, page, count, sort) => {
   sort = filterSort(sort);
-  return Reviews.aggregate([     
-    {
-      $limit: parseInt(count),
-    },
+  return Reviews.aggregate([
     {
       $match: {
         product_id: parseInt(productID),
         reported: 0,
       },
+    },
+    {
+      $limit: parseInt(count),
     },
     {
       $lookup: {
@@ -46,7 +46,8 @@ const retrieveReviews = (productID, page, count, sort) => {
         "photos._id": 0,
       },
     },
-  ]).sort({sort: -1})
+  ])
+    .sort({ sort: -1 })
     .exec()
     .then((results) => {
       let queryResults = {
@@ -92,7 +93,7 @@ const retrieveMeta = (productID) => {
         as: "characteristics",
       },
     },
- 
+
     {
       $group: {
         _id: "$id",

@@ -9,7 +9,7 @@ const {
   getRatingsCounts,
   formatData,
   getAvg,
-  filterSort
+  filterSort,
 } = require("./helper");
 const {
   getNewCharID,
@@ -19,12 +19,16 @@ const {
 
 // route for review/list
 const retrieveReviews = (productID, page, count, sort) => {
+  sort = filterSort(sort);
   return Reviews.aggregate([
     {
       $match: {
         product_id: parseInt(productID),
         reported: 0,
       },
+    },
+    {
+      $limit: parseInt(count),
     },
     {
       $lookup: {
@@ -35,23 +39,15 @@ const retrieveReviews = (productID, page, count, sort) => {
       },
     },
     {
-      $limit: parseInt(count),
-    },
-    {
-      $sort: {
-        sort : -1
-      },
-    },
-    {
       $project: {
         _id: 0,
         reported: 0,
         product_id: 0,
         "photos._id": 0,
-        _v: 0,
       },
     },
   ])
+    .sort({ sort: -1 })
     .exec()
     .then((results) => {
       let queryResults = {
@@ -62,8 +58,7 @@ const retrieveReviews = (productID, page, count, sort) => {
       };
       return queryResults;
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       queryResult = {
         product_id: productID,
         page: 0,
@@ -98,6 +93,7 @@ const retrieveMeta = (productID) => {
         as: "characteristics",
       },
     },
+
     {
       $group: {
         _id: "$id",
@@ -159,7 +155,7 @@ const updateHelpful = async (params) => {
   await Reviews.findOneAndUpdate({ review_id: params }, updateQuery)
     .exec()
     .then((results) => {
-      console.log("results", results);
+      return;
     })
     .catch((err) => {
       return err;
@@ -171,7 +167,7 @@ const reportReview = async (params) => {
   await Reviews.findOneAndUpdate({ review_id: params }, updateQuery)
     .exec()
     .then((results) => {
-      console.log("results", results);
+      return;
     })
     .catch((err) => {
       return err;
@@ -224,23 +220,23 @@ const addReview = (productID, params) => {
       return getNewCharID();
     })
     .then((results) => {
-      const {id, char_id} = results;
+      const { id, char_id } = results;
       const promisedCharReviewSaved = Object.entries(
         params.characteristics
       ).map((char, i) => {
         const charReviewInstance = new CharReview({
           id: parseInt(id) + (1 + i),
-          characteristic_id: Number((char_id) + (1 + i)),
+          characteristic_id: Number(char_id + (1 + i)),
           review_id: newReivewID,
           value: Number(char[1].value),
-        });        
+        });
         console.log(typeof char_id);
         return charReviewInstance.save();
       });
       const promisedCharSaved = Object.entries(params.characteristics).map(
         (char, i) => {
           const CharIntstance = new Characteristics({
-            id: Number((char_id) + (1 + i)),
+            id: Number(char_id + (1 + i)),
             product_id: productID,
             name: char[0],
           });
